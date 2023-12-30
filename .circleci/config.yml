@@ -2,25 +2,51 @@
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 
+executors:
+  arm64:
+    machine:
+      image: ubuntu-2004:current
+      docker_layer_caching: true
+    resource_class: arm.medium
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
-  say-hello:
+  build:
     # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/configuration-reference/#executor-job
-    docker:
-      - image: cimg/base:stable
+    executor: arm64
     # Add steps to the job
     # See: https://circleci.com/docs/configuration-reference/#steps
     steps:
       - checkout
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: "Docker Version"
+          command: |
+            docker version
+      - run:
+          name: "Login to Docker Hub"
+          command: |
+            echo $DOCKERHUB_ACCESS_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      - run:
+          name: "Build"
+          command: |
+            docker build -t wsbky/kali-linux:latest .
+      - run:
+          name: "Push"
+          command: |
+            docker push wsbky/kali-linux:latest
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  kali-linux-docker-build:
+    triggers:
+      - schedule:
+          cron: "30 3 */3 * *"
     jobs:
-      - say-hello
+      - build:
+          filters:
+            branches:
+              only:
+                - main
