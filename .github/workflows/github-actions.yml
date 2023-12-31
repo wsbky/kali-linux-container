@@ -7,8 +7,10 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
+      - name: Expand spaces
+        run: rm -rf /opt/hostedtoolcache
       -
         name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +31,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/arm64
           push: true
           tags: wsbky/kali-linux:latest
