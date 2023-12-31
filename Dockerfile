@@ -7,6 +7,7 @@ RUN apt-get -y update && apt-get -y upgrade \
     kali-linux-headless \
     pciutils \
     iputils-ping net-tools \
+    man-db \
     && apt-get -y autoremove \
     && apt-get clean
 
